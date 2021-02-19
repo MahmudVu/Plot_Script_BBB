@@ -2,9 +2,10 @@
 
 import numpy as np
 import matplotlib.pylab as plt
+from scipy.stats import poisson
+from scipy.optimize import curve_fit
+from scipy.special import factorial
 from matplotlib.ticker import FormatStrFormatter
-from itertools import izip_longest
-from distfit import distfit
 
 #%%
 '''plotting properties in this block'''
@@ -62,9 +63,11 @@ param_default()
 time=[254, 11, 4, 3.5, 1.8, 3.6, 4.5, 4.3, 59, 17, 338, 40, 6.85, 58] # time to failure data
 
 
-n, bins, patches = plt.hist(x=time, bins='auto', color='#0504aa',
+
+
+entries, bin_edges, patches = plt.hist(x=time, bins='auto', color='#0504aa',
                             alpha=0.7, rwidth=0.85) #bin -> x asis time window, n-> number of failure in y-axis
-print n, bins
+print(entries, bin_edges)
 plt.grid(axis='y', alpha=0.75)
 plt.xlabel('Time  to System Failure (Mins)')
 plt.ylabel('Frequency (#)')
@@ -72,16 +75,61 @@ plt.text(130, 5, r'$\mu$P' + ' irradiated with '+ r'0.1 $\mu$'+'Ci source') #ins
 plt.savefig('time.png')
 plt.savefig('time.pdf')
 
-#Trial Poisson Fit
-#def poisson_pmf(k, lam):
-#    return (lam**k*np.exp(-lam)) / np.math.factorial(k)
-#
-#
-#
-#x_rvs=pd.Series(poisson.rvs(22, size=100000, random_state=2))
-#data=x_rvs.value_counts().sort_index().to_dict()
-#fig, ax= plt.subplots()
-#ax.bar(range(len(data)), list(data.values()), align='center')
-#plt.xticks(range(len(data)), list(data.keys()))
 
+# # the bins should be of integer width, because poisson is an integer distribution
+# bins = np.arange(11) - 0.5
+# entries, bin_edges, patches = plt.hist(time, bins=bins, density=True, label='Data')
+
+# calculate bin centres
+bin_middles = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+
+
+def fit_function(k, lamb):
+    '''poisson function, parameter lamb is the fit parameter'''
+    return poisson.pmf(k, lamb)
+
+
+# fit with curve_fit
+parameters, cov_matrix = curve_fit(fit_function, bin_middles, entries)
+
+# plot poisson-deviation with fitted parameter
+x_plot = np.arange(0, 350)
+
+plt.plot(
+    x_plot,
+    fit_function(x_plot, *parameters),
+    marker='o', linestyle='',
+    label='Fit result',
+)
+plt.legend()
 plt.show()
+
+
+
+#
+# n, bins, patches = plt.hist(x=time, bins='auto', color='#0504aa',
+#                             alpha=0.7, rwidth=0.85) #bin -> x asis time window, n-> number of failure in y-axis
+# print(n, bins)
+# plt.grid(axis='y', alpha=0.75)
+# plt.xlabel('Time  to System Failure (Mins)')
+# plt.ylabel('Frequency (#)')
+# plt.text(130, 5, r'$\mu$P' + ' irradiated with '+ r'0.1 $\mu$'+'Ci source') #insert text in fig
+# plt.savefig('time.png')
+# plt.savefig('time.pdf')
+#
+# #Trial Poisson Fit
+# def fit_function(k, lambda_val):
+#     return poisson.pmf(k, lambda_val)
+#
+# # x_rvs=pd.Series(poisson.rvs(22, size=100000, random_state=2))
+# # data=x_rvs.value_counts().sort_index().to_dict()
+# # fig, ax= plt.subplots()
+# # ax.bar(range(len(data)), list(data.values()), align='center')
+# # plt.xticks(range(len(data)), list(data.keys()))
+#
+# # t = np.arange(0, 5, 0.1)
+# # x = np.power(t, 5)
+# # y = factorial(t)
+# #
+# # plt.plot( t, x / y, 'bs')
+# plt.show()
