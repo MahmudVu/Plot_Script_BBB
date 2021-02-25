@@ -13,7 +13,7 @@ from matplotlib.ticker import FormatStrFormatter
 '''plotting properties in this block'''
 plt.clf()
 
-plt.style.use('classic')
+# plt.style.use('classic')
 
 
 def param_default():
@@ -44,7 +44,7 @@ def param_default():
 #    'figure.dpi'            : 300       ,
 #    'axes.linewidth'        : 0.5       ,
 #    'axes.labelweight'      : 'bold'    ,
-    'axes.grid'             : False      , 
+    'axes.grid'             : False      ,
     'figure.facecolor': 'white',
     'figure.edgecolor': 'white',
     'lines.linewidth'       : 2.0       ,
@@ -54,14 +54,51 @@ def param_default():
     'figure.autolayout'     : True      ,
     'axes.xmargin':0.02,
     'axes.ymargin':0.02,
+    'bar': (0, 0.5, 1)
     }
 
     plt.rcParams.update(params)
+    # plt.bar(0, 0.5, 1)
+    # p2 = plt.bar(0, 0.6, 1)
 
-param_default()
+
+# param_default()
 
 # Main data array
 time=[254, 11, 4, 3.5, 1.8, 3.6, 4.5, 4.3, 59, 17, 338, 40, 6.85, 58] # time to failure data
+
+# N = len(time)
+# ind = np.arange(N)
+# width = 0.4
+#
+#
+# p1 = plt.bar(ind, time[1], width, color='r')
+# p2 = plt.bar(ind, time[2], width, bottom=time[1], color='b')
+# p3 = plt.bar(ind, time[3], width,
+#              bottom=np.array(time[1])+np.array(time[2]), color='g')
+# p4 = plt.bar(ind, time[4], width,
+#              bottom=np.array(time[1])+np.array(time[2])+np.array(time[3]),
+#              color='c')
+
+# coffee = np.array([0.05, 0.05, 0.07, 0.06, 0.07])
+# water = np.array([0.05, 0.05, 0.07, 0.06, 0.07])
+# tea = np.array([0.01, 0.03, 0.00, 0.02, 0.04])
+# names = ['Mary', 'Paul', 'Billy', 'Franka', 'Stephan']
+#
+# fig = plt.figure(figsize=(6,5), dpi=200)
+#
+# left, bottom, width, height = 0.2, 0.1, 0.7, 0.8
+# ax = fig.add_axes([left, bottom, width, height])
+#
+# width = 0.35
+# ticks = np.arange(len(names))
+# ax.bar(ticks, tea, width, label='Coffee', bottom=water + coffee)
+# ax.bar(ticks, coffee, width, align="center", label='Tea',
+#        bottom=water)
+# ax.bar(ticks, water, width, align="center", label='Water')
+
+plt.legend()
+plt.show()
 
 
 # Below are the 2 implementations of poisson/histogram fit generation
@@ -76,20 +113,20 @@ time=[254, 11, 4, 3.5, 1.8, 3.6, 4.5, 4.3, 59, 17, 338, 40, 6.85, 58] # time to 
 #
 # This implementation also includes plots of both normal and poisson distributions on the data given in the histogram.
 # This is the best fit I have been able to achieve thus far
-
+#
 # Perform jacobian transformation computation for poisson
-def transformation_and_jacobian(x):
-    return 1./x, 1./x**2.
-
-# Generate normal distribution from data
-def tfm_normal_pdf(x, lam):
-    y, J = transformation_and_jacobian(x)
-    return norm.pdf(y, lam, np.sqrt(lam)) * J
-
-# Generate poisson distribution from data
-def tfm_poisson_pdf(x, mu):
-    y, J = transformation_and_jacobian(x)
-    return np.exp(y * np.log(mu) - mu - gammaln(y + 1.)) * J
+# def transformation_and_jacobian(x):
+#     return 1./x, 1./x**2.
+#
+# # Generate normal distribution from data
+# def tfm_normal_pdf(x, lam):
+#     y, J = transformation_and_jacobian(x)
+#     return norm.pdf(y, lam, np.sqrt(lam)) * J
+#
+# # Generate poisson distribution from data
+# def tfm_poisson_pdf(x, mu):
+#     y, J = transformation_and_jacobian(x)
+#     return np.exp(y * np.log(mu) - mu - gammaln(y + 1.)) * J
 
 # Call histogram plot on data
 hist, bins = np.histogram(time, bins=50, density=True)
@@ -105,12 +142,12 @@ plt.bar(center, hist, align='center', width=width, label = 'Normalised data')
 p0 = 1 / np.mean(time)
 
 # Fit the fitted versions of the normal and poisson distributions onto the histogram
-norm_opt, _ = curve_fit(tfm_normal_pdf, center, hist, p0=p0)
-pois_opt, _ = curve_fit(tfm_poisson_pdf, center, hist, p0=p0)
-
-# Plot everything together
-plt.plot(center, tfm_normal_pdf(center, *norm_opt), 'g--', label='Normal Fit (post-transformation)')
-plt.plot(center, tfm_poisson_pdf(center, *pois_opt), 'r--', label='Poisson Fit (post-transformation)')
+# norm_opt, _ = curve_fit(tfm_normal_pdf, center, hist, p0=p0)
+# pois_opt, _ = curve_fit(tfm_poisson_pdf, center, hist, p0=p0)
+#
+# # Plot everything together
+# plt.plot(center, tfm_normal_pdf(center, *norm_opt), 'g--', label='Normal Fit (post-transformation)')
+# plt.plot(center, tfm_poisson_pdf(center, *pois_opt), 'r--', label='Poisson Fit (post-transformation)')
 
 plt.legend()
 plt.show()
